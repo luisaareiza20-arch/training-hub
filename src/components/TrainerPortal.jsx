@@ -196,6 +196,7 @@ function TrainerSidebar({ trainer, processors, activeFilter, onFilterChange, onL
 export default function TrainerPortal({ trainerId, onLogout }) {
   const { data, loading, error } = useTrainer(trainerId)
   const [activeFilter, setActiveFilter] = useState('all')
+  const [reportStatus, setReportStatus] = useState('idle')
 
   if (loading) return <LoadingScreen />
   if (error)   return <ErrorScreen message={error} />
@@ -214,6 +215,37 @@ export default function TrainerPortal({ trainerId, onLogout }) {
   }
   const { title, sub } = TITLES[activeFilter]
 
+  async function generateReport() {
+    const webhookUrl  = import.meta.env.VITE_MAKE_REPORT_WEBHOOK
+    const driveFolderUrl = import.meta.env.VITE_REPORTS_DRIVE_URL
+    if (!webhookUrl) return
+    setReportStatus('loading')
+    try {
+      await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trainer_id:   trainerId,
+          trainer_name: trainer.fullName,
+          generated_at: new Date().toISOString(),
+        }),
+      })
+      setReportStatus('done')
+      if (driveFolderUrl) window.open(driveFolderUrl, '_blank')
+      setTimeout(() => setReportStatus('idle'), 5000)
+    } catch {
+      setReportStatus('error')
+      setTimeout(() => setReportStatus('idle'), 4000)
+    }
+  }
+
+  const REPORT_LABEL = {
+    idle:    '↗ Generate Report',
+    loading: 'Generating…',
+    done:    '✓ Report Ready',
+    error:   '⚠ Try Again',
+  }
+
   return (
     <div className="app-shell">
       <TrainerSidebar
@@ -225,8 +257,18 @@ export default function TrainerPortal({ trainerId, onLogout }) {
       />
       <div className="main">
         <div className="main-header">
-          <div className="main-header-title">{title}</div>
-          <div className="main-header-sub">{sub}</div>
+          <div>
+            <div className="main-header-title">{title}</div>
+            <div className="main-header-sub">{sub}</div>
+          </div>
+          <button
+            className={`btn-report btn-report-${reportStatus}`}
+            onClick={generateReport}
+            disabled={reportStatus === 'loading'}
+          >
+            {reportStatus === 'loading' && <span className="spinner-sm" />}
+            {REPORT_LABEL[reportStatus]}
+          </button>
         </div>
         <div className="main-content" style={{ maxWidth: 760 }}>
           {filtered.length === 0 ? (

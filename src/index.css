@@ -507,6 +507,47 @@ body {
   background: var(--bg);
   z-index: 10;
   border-bottom: 1px solid transparent;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+/* ── Report button ── */
+.btn-report {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: var(--r);
+  border: 1.5px solid var(--brand);
+  background: white;
+  color: var(--brand-dark);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.btn-report:hover:not(:disabled) {
+  background: var(--brand);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+.btn-report:disabled { opacity: 0.65; cursor: not-allowed; }
+.btn-report-done  { border-color: var(--green); color: var(--green); }
+.btn-report-error { border-color: var(--red);   color: var(--red); }
+.btn-report-loading { border-color: var(--brand); color: var(--brand-dark); }
+
+.spinner-sm {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--brand-dim);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
 }
 
 .main-header-title {
